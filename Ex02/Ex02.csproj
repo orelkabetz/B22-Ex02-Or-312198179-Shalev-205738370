@@ -35,7 +35,7 @@
     <Compile Include="ConsoleUserInterface\Controller.cs" />
     <Compile Include="ConsoleUserInterface\GameBoard.cs" />
     <Compile Include="ConsoleUserInterface\Messages.cs" />
-    <Compile Include="Logic\ShapeWrapper.cs" />
+    <Compile Include="ShapeWrapper.cs" />
     <Compile Include="Logic\DirectionWrapper.cs" />
     <Compile Include="Logic\Game.cs" />
     <Compile Include="Logic\GameState.cs" />

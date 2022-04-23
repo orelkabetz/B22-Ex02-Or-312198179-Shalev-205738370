@@ -76,7 +76,8 @@ namespace Ex02.ConsoleUserInterface
             Screen.Clear();
             Console.WriteLine(getSizeMessage);
             System.Console.SetCursorPosition(17, 7);
-            m_boardSize = Int32.Parse(Console.ReadLine());
+            //m_boardSize = Int32.Parse(Console.ReadLine());
+            Int32.TryParse(Console.ReadLine(), out m_boardSize);
             convertChoiceToActualSize();
             return;
         }
@@ -107,7 +108,8 @@ namespace Ex02.ConsoleUserInterface
             Screen.Clear();
             Console.WriteLine(getPlayersNumberMessage);
             System.Console.SetCursorPosition(17, 6);
-            m_oneOrTwoPlayers = Int32.Parse(Console.ReadLine());
+           // m_oneOrTwoPlayers = Int32.Parse(Console.ReadLine());
+            Int32.TryParse(Console.ReadLine(), out m_oneOrTwoPlayers);
             if (m_oneOrTwoPlayers == 2)
             {
                 Screen.Clear();
@@ -116,6 +118,10 @@ namespace Ex02.ConsoleUserInterface
         Hi 2nd Player!");
                 Console.WriteLine(hiSecondPlayer);
                 m_playerTwoName = getNameFromUser();
+            }
+            else
+            {
+                m_playerTwoName = "Computer";
             }
             return;
         }
@@ -128,6 +134,19 @@ A valid move should look like this 'Gf>He'
 Please try again: ");
             System.Console.SetCursorPosition(0, BoardSize*2+1);
             Console.WriteLine(invalid);
+        }
+        public void displayTurn(ShapeWrapper playerTurn)
+        {
+            // Print a message to the user which one's turn, and to make a move
+
+            if (playerTurn.getShapeChar() == 'X')
+            {
+                Console.WriteLine(PlayerOneName + "'s turn : ({0})", playerTurn.getShapeChar());
+            }
+            else
+            {
+                Console.WriteLine(PlayerTwoName + "'s turn : ({0})", playerTurn.getShapeChar());
+            }
         }
     }
 }

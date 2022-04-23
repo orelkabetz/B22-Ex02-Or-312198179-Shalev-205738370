@@ -6,25 +6,46 @@ using Ex02.Logic;
 using Ex02.ConsoleUtils;
 
 namespace Ex02.ConsoleUserInterface
-{
+{ 
     public class Controller
     {
         Game m_game;
-        Messages m_messages = new Messages();
+        Messages m_messages;
         private string m_currentMove;
+        private ShapeWrapper m_playerTurn;
+        public Controller()
+        {
+            m_messages = new Messages();
+            m_playerTurn = new ShapeWrapper('X');
+        }
         public void Run() // Maybe should be static and not object referenced
         {
             m_messages.start();
-            createNewGame(m_messages.BoardSize);
+            createNewGame(m_messages.BoardSize, m_messages.PlayerOneName, m_messages.PlayerTwoName);
             printBoard();
-            // while (is not finished)
-            getUserMove();
-           // m_game.makeMove(m_currentMove);
-            
+            // while (is not finished) // נצטרך לעשות בדיקה אם לא נגמר בכל סוף תור
+            // תור 1
+            m_messages.displayTurn(m_playerTurn);
+            setUserMove();
+            m_game.makeMove(m_currentMove, m_playerTurn);
+            printBoard();
+            // תור 2
+            m_messages.displayTurn(m_playerTurn);
+            if (m_messages.OneOrTwoPlayers == 2)
+            {
+                setUserMove();
+                m_game.makeMove(m_currentMove, m_playerTurn);
+                printBoard();
+            }
+            else
+            {
+               // m_game.makeComputerMove();
+                printBoard();
+            }
         }
-        public void createNewGame(int boardSize)
+        public void createNewGame(int boardSize, string playerOneName, string playerTwoName)
         {
-            m_game = new Game(boardSize);
+            m_game = new Game(boardSize, playerOneName, playerTwoName);
             intializeBoard(boardSize);
         }
         private void intializeBoard(int boardSize)
@@ -139,7 +160,8 @@ e| {24} | {25} | {26} | {27} | {28} | {29} |
 f| {30} | {31} | {32} | {33} | {34} | {35} |
 =========================
 ", printableArray);
-            string board8 = string.Format(
+
+        string board8 = string.Format(
 @"   A   B   C   D   E   F   G   H
 =================================
 a| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} |
@@ -211,9 +233,10 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
             }
             return o_printableArray;
         }
-        private void getUserMove()
+        private void setUserMove()
         {
-            m_currentMove = Console.ReadLine();
+            
+        m_currentMove = Console.ReadLine();
             if (!isUserMoveValid(m_currentMove))
             {
                 while (!isUserMoveValid(m_currentMove))
@@ -239,6 +262,10 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
                 Console.WriteLine("YES");
                 return true;
             }
+        }
+        private void switchTurn()
+        {
+            //תשנה תור
         }
     }
 }

@@ -8,8 +8,7 @@ namespace Ex02.Logic
     public class Player
     {
         private string m_nickName;
-
-        private ShapeWrapper.eShape m_shape; // Not sure about it
+        private ShapeWrapper m_shape; // Not sure about it
         private int m_score;
         private int m_numOfWins;
         private int m_numOfDraws;
@@ -18,7 +17,7 @@ namespace Ex02.Logic
             get { return m_nickName; }
             set { m_nickName = value; }
         }
-        public ShapeWrapper.eShape shape
+        public ShapeWrapper shape
         {
             get { return m_shape; }
             set { m_shape = value; }
@@ -37,6 +36,13 @@ namespace Ex02.Logic
         {
             get { return m_numOfDraws; }
             set { m_numOfDraws = value; }
+        }
+        public Player(string nickName)
+        {
+            m_nickName = nickName;
+            m_score = 0;
+            m_numOfWins = 0;
+            m_numOfDraws = 0;
         }
     }
 }

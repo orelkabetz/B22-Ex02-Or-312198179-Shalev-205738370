@@ -8,16 +8,26 @@ namespace Ex02.Logic
     public class GameState
     {
         private GameState m_previous, m_next;
-        private ShapeWrapper.eShape m_playerTurn;
+        private ShapeWrapper m_playerTurn;
         private Piece[,] m_boardArray;
         public Piece[,] boardArray
         { 
             get { return m_boardArray; } 
             set { m_boardArray = value; }
         }
-        public GameState(int width, int height)
+        public GameState(int size)
         {
-            m_boardArray = new Piece[width, height];
+            m_boardArray = new Piece[size, size];
+            m_playerTurn = new ShapeWrapper('X');
+        }
+        public ShapeWrapper playerTurn
+        {
+            get { return m_playerTurn; }
+            set { m_playerTurn = value; }
+        }
+        private void switchTurn()
+        {
+            //תשנה תור
         }
     }
 }
