@@ -20,27 +20,54 @@ namespace Ex02.ConsoleUserInterface
         }
         public void Run() // Maybe should be static and not object referenced
         {
+            bool finished = false;
+            bool keepPlaying = true;
+            bool moveIlegal = true;
             m_messages.start();
             createNewGame(m_messages.BoardSize, m_messages.PlayerOneName, m_messages.PlayerTwoName);
             printBoard();
-            // while (is not finished) // נצטרך לעשות בדיקה אם לא נגמר בכל סוף תור
-            // תור 1
-            m_messages.displayTurn(m_playerTurn);
-            setUserMove();
-            m_game.makeMove(m_currentMove, m_playerTurn);
-            printBoard();
-            // תור 2
-            m_messages.displayTurn(m_playerTurn);
-            if (m_messages.OneOrTwoPlayers == 2)
+            while (!finished) // נצטרך לעשות בדיקה אם לא נגמר בכל סוף תור
             {
-                setUserMove();
-                m_game.makeMove(m_currentMove, m_playerTurn);
-                printBoard();
-            }
-            else
-            {
-               // m_game.makeComputerMove();
-                printBoard();
+                // תור 1
+                m_messages.displayTurn(m_game.currentState.playerTurn);
+                while (keepPlaying)
+                {
+                    setUserMove();
+                    moveIlegal = m_game.makeMove(m_currentMove, m_playerTurn);
+                    printBoard();
+                    if (!moveIlegal)
+                    {
+                        m_messages.printInvalidLogicInput();
+                    }
+                    keepPlaying = m_game.currentState.isEatingPossible();
+                }
+                // להוסיף בדיקה אם יש עוד אכילה
+                switchTurn();
+                keepPlaying = true;
+                // תור 2
+                m_messages.displayTurn(m_game.currentState.playerTurn);
+                if (m_messages.OneOrTwoPlayers == 2)
+                {
+                    while (keepPlaying)
+                    {
+                        setUserMove();
+                        moveIlegal = m_game.makeMove(m_currentMove, m_playerTurn);
+                        printBoard();
+                        if (!moveIlegal)
+                        {
+                            m_messages.printInvalidLogicInput();
+                        }
+                        keepPlaying = m_game.currentState.isEatingPossible();
+                    }
+                }
+                else
+                {
+                    // m_game.makeComputerMove();
+                    printBoard();
+                }
+                // להוסיף בדיקה אם יש עוד אכילה
+                keepPlaying = true;
+                switchTurn();
             }
         }
         public void createNewGame(int boardSize, string playerOneName, string playerTwoName)
@@ -88,7 +115,7 @@ namespace Ex02.ConsoleUserInterface
         }
         private Piece generateNewOPiece()
         {
-            return new Piece(ShapeWrapper.eShape.O);
+            return new Piece(new ShapeWrapper('O'));
         }
         private void generateEPieces(int boardSize)
         {
@@ -102,7 +129,7 @@ namespace Ex02.ConsoleUserInterface
         }
         private Piece generateNewEmptyPiece()
         {
-            return new Piece(ShapeWrapper.eShape.E);
+            return new Piece(new ShapeWrapper(' '));
         }
         private void genereateXPieces(int boardSize)
         {
@@ -138,7 +165,7 @@ namespace Ex02.ConsoleUserInterface
         }
         private Piece generateNewXPiece()
         {
-            return new Piece(ShapeWrapper.eShape.X);
+            return new Piece(new ShapeWrapper('X'));
         }
         private void printBoard()
         {
@@ -228,7 +255,7 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
             {
                 for (int j = 0; j < m_messages.BoardSize; j++)
                 {
-                    o_printableArray[i* m_messages.BoardSize + j] = m_game.currentState.boardArray[i,j].getShape();
+                    o_printableArray[i* m_messages.BoardSize + j] = m_game.currentState.boardArray[i,j].Shape.getShapeChar();
                 }
             }
             return o_printableArray;
@@ -265,7 +292,15 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
         }
         private void switchTurn()
         {
-            //תשנה תור
+            if (m_playerTurn.getShapeChar() == 'X')
+            {
+                m_playerTurn.Shape = ShapeWrapper.eShape.O;
+            }
+            else
+            {
+                m_playerTurn.Shape = ShapeWrapper.eShape.X;
+            }
+            m_game.currentState.switchTurn();
         }
     }
 }

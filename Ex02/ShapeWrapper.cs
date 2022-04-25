@@ -29,7 +29,7 @@ namespace Ex02
                 case 'X':
                     m_shape = eShape.X;
                     break;
-                case 'E':
+                case ' ':
                     m_shape= eShape.E;
                     break;
                 default:

@@ -9,6 +9,7 @@ namespace Ex02.Logic
     {
         private GameState m_previous, m_next;
         private ShapeWrapper m_playerTurn;
+        private int m_boardSize;
         private Piece[,] m_boardArray;
         public Piece[,] boardArray
         { 
@@ -17,6 +18,7 @@ namespace Ex02.Logic
         }
         public GameState(int size)
         {
+            m_boardSize = size;
             m_boardArray = new Piece[size, size];
             m_playerTurn = new ShapeWrapper('X');
         }
@@ -25,9 +27,323 @@ namespace Ex02.Logic
             get { return m_playerTurn; }
             set { m_playerTurn = value; }
         }
-        private void switchTurn()
+        public void switchTurn()
         {
-            //תשנה תור
+            if (m_playerTurn.getShapeChar() == 'X')
+            {
+                m_playerTurn.Shape = ShapeWrapper.eShape.O;
+            }
+            else
+            {
+                m_playerTurn.Shape = ShapeWrapper.eShape.X;
+            }
         }
+        public bool checkMove(Move currentMove)
+        {
+            if ((currentMove.startPosition.Row == currentMove.endPosition.Row)
+                || (currentMove.startPosition.Col == currentMove.endPosition.Col))
+            {
+                return false;
+            }
+            if(!isStartPositionValid(currentMove)) //האם יש שחקן, האם השחקן הוא של הפלייר הנוכחי
+            {
+                return false;
+            }
+            if (!isEndPositionValid(currentMove)) // האם המשבצת פנויה, האם הוא במרחק של קפיצה אחת מהסטרט, בתוך הפונקציה נבדוק האם מלך
+            {
+                return false;
+            }
+            return true;
+        }
+        public void playMove(Move currentMove)
+        {
+            int eatenRow;
+            int eatenCol;
+            m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape = new ShapeWrapper(' ');
+            m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape = new ShapeWrapper(m_playerTurn.getShapeChar());
+            if (Math.Abs(currentMove.startPosition.Row-currentMove.endPosition.Row) == 2)
+            {
+                eatenRow = (currentMove.startPosition.Row + currentMove.endPosition.Row) / 2;
+                eatenCol = (currentMove.startPosition.Col + currentMove.endPosition.Col) / 2;
+                m_boardArray[eatenRow, eatenCol].Shape = new ShapeWrapper(' ');
+            }
+        }
+        private bool isStartPositionValid(Move currentMove)
+        {
+            char startPositionShape = m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape.getShapeChar();
+            if (startPositionShape != playerTurn.getShapeChar())
+            {
+                return false;
+            }
+            return true;
+        }
+        private bool isEndPositionValid(Move currentMove)
+        {
+            bool isEndPositionLegal = true;
+            
+            if (!isEndPositionEmpty(currentMove))
+            {
+                return false;
+            }
+            if (!insideTheBoard(currentMove))
+            {
+                return false;
+            }
+            if (m_playerTurn.getShapeChar() == 'X')
+            {
+                if (!isDiagonalDown(currentMove,1))
+                {
+                    isEndPositionLegal = false;
+                }
+            }
+            else
+            { 
+                if (!isDiagonalUp(currentMove,1))
+                {
+                    isEndPositionLegal = false;
+                }
+            }
+            if (m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].IsKing)
+            {
+                isEndPositionLegal = true;
+                if (currentMove.sender.shape.getShapeChar() == 'X')
+                {
+                    if (!isDiagonalUp(currentMove,1))
+                    {
+                        isEndPositionLegal = false;
+                    }
+                }
+                else // 'O'
+                {
+                    if (!isDiagonalDown(currentMove,1))
+                    {
+                        isEndPositionLegal = false;
+                    }
+                }
+            }
+            return isEndPositionLegal;
+        }
+        private bool isEndPositionEmpty(Move currentMove)
+        {
+            char endPositionShape = m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape.getShapeChar();
+
+            if (endPositionShape != ' ')
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private bool insideTheBoard(Move currentMove)
+        {
+            bool isStartPositionLegal = true;
+            bool isEndPositionLegal = true;
+            if (currentMove.startPosition.Row < 0 || currentMove.startPosition.Row >= m_boardSize)
+            {
+                isStartPositionLegal = false;
+            }
+            if (currentMove.startPosition.Col < 0 || currentMove.startPosition.Col >= m_boardSize)
+            {
+                isStartPositionLegal = false;
+            }
+            if (currentMove.endPosition.Row < 0 || currentMove.endPosition.Row >= m_boardSize)
+            {
+                isEndPositionLegal = false;
+            }
+            if (currentMove.endPosition.Col < 0 || currentMove.endPosition.Col >= m_boardSize)
+            {
+                isEndPositionLegal = false;
+            }
+            return isStartPositionLegal && isEndPositionLegal;
+        }
+        private bool isDiagonalDown(Move currentMove, int stepSize)
+        {
+            if (stepSize == 1)
+            {
+                if (isEatingPossible())
+                {
+                    int x = 0;
+
+                    return checkIfPlayerMoveEating(currentMove);
+                }
+            }
+            //
+            if (currentMove.startPosition.Row != (currentMove.endPosition.Row + stepSize))
+            {
+                return false;
+            }
+            else if (!(currentMove.startPosition.Col != (currentMove.endPosition.Col - stepSize))
+                && !(currentMove.startPosition.Col != (currentMove.endPosition.Col + stepSize)))
+            {
+                return false;
+            }
+            return true;
+        }
+        private bool isDiagonalUp(Move currentMove, int stepSize)
+        {
+            if (stepSize == 1)
+            {
+                if (isEatingPossible())
+                {
+                    int x = 0;
+                    return checkIfPlayerMoveEating(currentMove);
+                }
+            }
+            if (currentMove.startPosition.Row != (currentMove.endPosition.Row - stepSize))
+            {
+                return false;
+            }
+            else if (!(currentMove.startPosition.Col != (currentMove.endPosition.Col - stepSize))
+                && !(currentMove.startPosition.Col != (currentMove.endPosition.Col + stepSize)))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        //Checking if move is eating
+        private bool checkIfPlayerMoveEating(Move currentMove)
+        {
+            bool isEating = false;
+
+            int eatenRow = (currentMove.startPosition.Row + currentMove.endPosition.Row) /2;
+            int eatenCol = (currentMove.startPosition.Col + currentMove.endPosition.Col) / 2;
+            // check regular eating
+            //check if between there is opponnent
+            if (m_playerTurn.getShapeChar() == 'X')
+            {
+                if (isDiagonalDown(currentMove, 2))
+                {
+                    if (m_boardArray[eatenRow,eatenCol].Shape.getShapeChar() == 'O')
+                    isEating = true;
+                }
+            }
+            else // 'O'
+            {
+                if (isDiagonalUp(currentMove, 2))
+                {
+                    if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'X')
+                    isEating = true;
+                }
+            }
+            //check is king
+            // check king eating
+            if (m_boardArray[currentMove.startPosition.Row,currentMove.startPosition.Col].IsKing)
+            {
+                if (m_playerTurn.getShapeChar() == 'X')
+                {
+                    if (!isDiagonalDown(currentMove, 2))
+                    {
+                        if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'O')
+                            isEating = true;
+                    }
+                }
+                else // 'O'
+                {
+                    if (!isDiagonalUp(currentMove, 2))
+                    {
+                        if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'X')
+                            isEating = true;
+                    }
+                }
+            }
+            return isEating;
+        }
+        public bool isEatingPossible()
+        {
+            if (m_playerTurn.getShapeChar() == 'X')
+            {
+                return isEatingPossibleForX();
+            }
+            else // 'O'
+            {
+                return isEatingPossibleForO();
+            }
+        }
+        private bool isEatingPossibleForX()
+        {
+            for (int i = m_boardSize-1; i >= 0; i--)
+            {
+                for (int j = 0; j < m_boardSize; j++)
+                {
+                    if (m_boardArray[i, j].Shape.getShapeChar() == 'X')
+                    {
+                        if ((i - 2 >= 0 ) && (j - 2 >=0) && (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'O')
+                            &&
+                           (m_boardArray[i - 2, j - 2].Shape.getShapeChar() == ' '))
+                        {
+                            return true;
+                        }
+                        else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'O')
+                                &&
+                                (m_boardArray[i - 2, j+2].Shape.getShapeChar() == ' ')) 
+                        {
+                            return true;
+                        }
+                        if (m_boardArray[i, j].IsKing == true)
+                        {
+                            if ((i + 2 < m_boardSize) && (j - 2 >= 0) && (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'O')
+                             &&
+                                (m_boardArray[i + 2, j - 2].Shape.getShapeChar() == ' '))
+                            {
+                                return true;
+                            }
+                            else if ((i +2 < m_boardSize) && (j + 2 < m_boardSize) && (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'O')
+                                    &&
+                                    (m_boardArray[i + 2, j + 2].Shape.getShapeChar() == ' '))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        private bool isEatingPossibleForO()
+        {
+            for (int i = m_boardSize-1; i >= 0; i--)
+            {
+                for (int j = 0; j < m_boardSize; j++)
+                {
+                    if (m_boardArray[i, j].Shape.getShapeChar() == 'O')
+                    {
+                        if ((i + 2 < m_boardSize) && (j - 2 >= 0) && (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'X')
+                            &&
+                               (m_boardArray[i + 2, j - 2].Shape.getShapeChar() == ' '))
+                        {
+                            return true;
+                        }
+                        else if ((i + 2 < m_boardSize) && (j + 2 < m_boardSize) && (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'X')
+                                &&
+                                (m_boardArray[i + 2, j + 2].Shape.getShapeChar() == ' '))
+                        {
+                            return true;
+                        }
+
+                        if (m_boardArray[i, j].IsKing == true)
+                        {
+                            if ((i - 2 >= 0) && (j - 2 >= 0) && (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'X')
+                             &&
+                            (m_boardArray[i - 2, j - 2].Shape.getShapeChar() == ' '))
+                            {
+                                return true;
+                            }
+                            else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'X')
+                                    &&
+                                    (m_boardArray[i - 2, j + 2].Shape.getShapeChar() == ' '))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+
+
+      
     }
 }

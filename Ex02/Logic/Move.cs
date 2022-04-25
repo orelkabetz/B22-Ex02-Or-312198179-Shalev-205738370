@@ -16,9 +16,24 @@ namespace Ex02.Logic
             char startRow = move[1];
             char endCol = move[3];
             char endRow = move[4];
-            m_startPosition = new Position(startRow - 'A', startCol - 'A');
-            m_endPosition = new Position(endRow - 'A', endCol - 'A');
-            
+            m_startPosition = new Position(startRow - 'a', startCol - 'A');
+            m_endPosition = new Position(endRow - 'a', endCol - 'A');
+            m_sender = player;
+        }
+        public Position startPosition
+        {
+            get { return m_startPosition; }
+            set { m_startPosition = value; }
+        }
+        public Position endPosition
+        {
+            get { return m_endPosition; }
+            set { m_endPosition = value; }
+        }
+        public Player sender
+        {
+            get { return m_sender; }
+            set { m_sender = value; }
         }
     }
 

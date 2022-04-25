@@ -135,6 +135,15 @@ Please try again: ");
             System.Console.SetCursorPosition(0, BoardSize*2+1);
             Console.WriteLine(invalid);
         }
+        public void printInvalidLogicInput()
+        {
+            string invalid = string.Format(
+@"
+This move is not valid!
+Please try again: ");
+            System.Console.SetCursorPosition(0, BoardSize * 2 + 1);
+            Console.WriteLine(invalid);
+        }
         public void displayTurn(ShapeWrapper playerTurn)
         {
             // Print a message to the user which one's turn, and to make a move

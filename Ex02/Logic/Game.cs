@@ -26,17 +26,23 @@ namespace Ex02.Logic
             m_playerTwo = new Player(playerTwoName);
         }
 
-        public void makeMove(string m_currentMove, ShapeWrapper playerTurn)
+        public bool makeMove(string m_currentMove, ShapeWrapper playerTurn)
         {
+            Move currentMove;
             if (m_currentState.playerTurn.getShapeChar() == 'X')
             {
-                Move currentMove = new Move(m_currentMove, m_playerOne);
+                currentMove = new Move(m_currentMove, m_playerOne);
             }
             else
             {
-                Move currentMove = new Move(m_currentMove, m_playerTwo);
+                currentMove = new Move(m_currentMove, m_playerTwo);
             }
-
+            if (m_currentState.checkMove(currentMove))
+            {
+                m_currentState.playMove(currentMove);
+                return true;
+            }
+            return false;
         }
     }
 }
