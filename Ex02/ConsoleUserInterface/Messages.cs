@@ -12,6 +12,8 @@ namespace Ex02.ConsoleUserInterface
         private string m_playerTwoName;
         private int m_boardSize;
         private int m_oneOrTwoPlayers;
+        private string m_currentMove;
+        private string m_previousMove;
         public string PlayerOneName
         {
             get { return m_playerOneName; }
@@ -31,6 +33,16 @@ namespace Ex02.ConsoleUserInterface
         {
             get { return m_oneOrTwoPlayers; }
             set { m_oneOrTwoPlayers = value; }
+        }
+        public string CurrentMove
+        {
+            get { return m_currentMove; }
+            set { m_currentMove = value; }
+        }
+        public string PreviousMove
+        {
+            get { return m_previousMove; }
+            set { m_previousMove = value; }
         }
         public void start()
         {
@@ -144,16 +156,30 @@ Please try again: ");
             System.Console.SetCursorPosition(0, BoardSize * 2 + 1);
             Console.WriteLine(invalid);
         }
-        public void displayTurn(ShapeWrapper playerTurn)
+        public void displayTurn(ShapeWrapper playerTurn, ShapeWrapper previousTurn)
         {
             // Print a message to the user which one's turn, and to make a move
-
-            if (playerTurn.getShapeChar() == 'X')
+            if ((playerTurn.getShapeChar() == 'X') && (previousTurn.getShapeChar() == 'O'))
             {
+                if (m_previousMove != null)
+                {
+                    Console.WriteLine(PlayerTwoName + "'s move was ({0}): " + m_previousMove, previousTurn.getShapeChar());
+                }
                 Console.WriteLine(PlayerOneName + "'s turn : ({0})", playerTurn.getShapeChar());
             }
-            else
+            else if ((playerTurn.getShapeChar() == 'X') && (previousTurn.getShapeChar() == 'X'))
             {
+                Console.WriteLine(PlayerOneName + "'s move was ({0}): "+ m_previousMove, previousTurn.getShapeChar());
+                Console.WriteLine(PlayerOneName + "'s turn : ({0})", playerTurn.getShapeChar());
+            }
+            else if ((playerTurn.getShapeChar() == 'O') && (previousTurn.getShapeChar() == 'X'))
+            {
+                Console.WriteLine(PlayerOneName + "'s move was ({0}): " + m_previousMove, previousTurn.getShapeChar());
+                Console.WriteLine(PlayerTwoName + "'s turn ({0}):", playerTurn.getShapeChar());
+            }
+            else // 'O' && 'O'
+            {
+                Console.WriteLine(PlayerTwoName + "'s move was ({0}): " + m_previousMove , previousTurn.getShapeChar());
                 Console.WriteLine(PlayerTwoName + "'s turn : ({0})", playerTurn.getShapeChar());
             }
         }

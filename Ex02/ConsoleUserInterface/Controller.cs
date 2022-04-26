@@ -11,12 +11,13 @@ namespace Ex02.ConsoleUserInterface
     {
         Game m_game;
         Messages m_messages;
-        private string m_currentMove;
         private ShapeWrapper m_playerTurn;
+        private ShapeWrapper m_previousTurn;
         public Controller()
         {
             m_messages = new Messages();
             m_playerTurn = new ShapeWrapper('X');
+            m_previousTurn = new ShapeWrapper('O');
         }
         public void Run() // Maybe should be static and not object referenced
         {
@@ -29,35 +30,54 @@ namespace Ex02.ConsoleUserInterface
             while (!finished) // נצטרך לעשות בדיקה אם לא נגמר בכל סוף תור
             {
                 // תור 1
-                m_messages.displayTurn(m_game.currentState.playerTurn);
+                m_messages.PreviousMove = m_messages.CurrentMove;
+                m_messages.displayTurn(m_game.currentState.playerTurn, m_previousTurn);
+                //keep turn player
                 while (keepPlaying)
                 {
+
+                    // is there eating before move
+                    keepPlaying = m_game.currentState.isEatingPossible();
                     setUserMove();
-                    moveIlegal = m_game.makeMove(m_currentMove, m_playerTurn);
+                    moveIlegal = m_game.makeMove(m_messages.CurrentMove, m_playerTurn);
                     printBoard();
                     if (!moveIlegal)
                     {
                         m_messages.printInvalidLogicInput();
                     }
-                    keepPlaying = m_game.currentState.isEatingPossible();
+
+                    // is there eating after move
+                    if (keepPlaying)
+                    {
+                        keepPlaying = m_game.currentState.isEatingPossible();
+                    }
+
                 }
                 // להוסיף בדיקה אם יש עוד אכילה
                 switchTurn();
                 keepPlaying = true;
                 // תור 2
-                m_messages.displayTurn(m_game.currentState.playerTurn);
+                m_messages.PreviousMove = m_messages.CurrentMove;
+                m_messages.displayTurn(m_game.currentState.playerTurn, m_previousTurn);
                 if (m_messages.OneOrTwoPlayers == 2)
                 {
                     while (keepPlaying)
                     {
+                        // is there eating before move
+                        keepPlaying = m_game.currentState.isEatingPossible();
                         setUserMove();
-                        moveIlegal = m_game.makeMove(m_currentMove, m_playerTurn);
+                        moveIlegal = m_game.makeMove(m_messages.CurrentMove, m_playerTurn);
                         printBoard();
                         if (!moveIlegal)
                         {
                             m_messages.printInvalidLogicInput();
                         }
-                        keepPlaying = m_game.currentState.isEatingPossible();
+                        // is there eating after move
+                        if (keepPlaying)
+                        {
+                            // להוסיף הודעה על דאבל איטינג
+                            keepPlaying = m_game.currentState.isEatingPossible();
+                        }
                     }
                 }
                 else
@@ -68,6 +88,7 @@ namespace Ex02.ConsoleUserInterface
                 // להוסיף בדיקה אם יש עוד אכילה
                 keepPlaying = true;
                 switchTurn();
+                finished = m_game.currentState.checkGameOver();
             }
         }
         public void createNewGame(int boardSize, string playerOneName, string playerTwoName)
@@ -262,24 +283,23 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
         }
         private void setUserMove()
         {
-            
-        m_currentMove = Console.ReadLine();
-            if (!isUserMoveValid(m_currentMove))
+            m_messages.CurrentMove = Console.ReadLine();
+            if (!isUserMoveValid(m_messages.CurrentMove))
             {
-                while (!isUserMoveValid(m_currentMove))
+                while (!isUserMoveValid(m_messages.CurrentMove))
                 {
                     Screen.Clear();
                     printBoard();
                     System.Console.SetCursorPosition(0, m_messages.BoardSize+2);
                     m_messages.printInvalidInput();
-                    m_currentMove = Console.ReadLine();
+                    m_messages.CurrentMove = Console.ReadLine();
                 }
             }
         }
         private bool isUserMoveValid(string move) //Not finished!!
         {
             // string
-            if (m_currentMove.Length != 5)
+            if (m_messages.CurrentMove.Length != 5)
             {
                 Console.WriteLine("NO");
                 return false;
@@ -294,10 +314,12 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
         {
             if (m_playerTurn.getShapeChar() == 'X')
             {
+                m_previousTurn =  new ShapeWrapper(m_playerTurn.getShapeChar());
                 m_playerTurn.Shape = ShapeWrapper.eShape.O;
             }
             else
             {
+                m_previousTurn = new ShapeWrapper(m_playerTurn.getShapeChar());
                 m_playerTurn.Shape = ShapeWrapper.eShape.X;
             }
             m_game.currentState.switchTurn();

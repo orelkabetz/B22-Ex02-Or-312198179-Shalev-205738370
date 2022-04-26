@@ -16,8 +16,10 @@ namespace Ex02
         public enum eShape
         {
             O = 0,
-            X = 1,
-            E = 2,
+            U = 1, 
+            X = 2,
+            K = 3,
+            E = 4,
         }
         public ShapeWrapper(char shape)
         {
@@ -26,8 +28,14 @@ namespace Ex02
                 case 'O':
                     m_shape = eShape.O;
                     break;
+                case 'U':
+                    m_shape = eShape.U;
+                    break;
                 case 'X':
                     m_shape = eShape.X;
+                    break;
+                case 'K':
+                    m_shape = eShape.K;
                     break;
                 case ' ':
                     m_shape= eShape.E;
@@ -43,9 +51,17 @@ namespace Ex02
             {
                 return 'O';
             }
+            else if (m_shape == ShapeWrapper.eShape.U)
+            {
+                return 'U';
+            }
             else if (m_shape == ShapeWrapper.eShape.X)
             {
                 return 'X';
+            }
+            else if (m_shape == ShapeWrapper.eShape.K)
+            {
+                return 'K';
             }
             else
             {

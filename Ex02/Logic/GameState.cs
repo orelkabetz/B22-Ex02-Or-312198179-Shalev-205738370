@@ -40,6 +40,7 @@ namespace Ex02.Logic
         }
         public bool checkMove(Move currentMove)
         {
+            // Check if the start or end position is in the same row/col - not possible
             if ((currentMove.startPosition.Row == currentMove.endPosition.Row)
                 || (currentMove.startPosition.Col == currentMove.endPosition.Col))
             {
@@ -59,18 +60,96 @@ namespace Ex02.Logic
         {
             int eatenRow;
             int eatenCol;
+            char temp = m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape.getShapeChar();
             m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape = new ShapeWrapper(' ');
-            m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape = new ShapeWrapper(m_playerTurn.getShapeChar());
+            m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape = new ShapeWrapper(temp);
             if (Math.Abs(currentMove.startPosition.Row-currentMove.endPosition.Row) == 2)
             {
                 eatenRow = (currentMove.startPosition.Row + currentMove.endPosition.Row) / 2;
                 eatenCol = (currentMove.startPosition.Col + currentMove.endPosition.Col) / 2;
                 m_boardArray[eatenRow, eatenCol].Shape = new ShapeWrapper(' ');
             }
+            updateKing(currentMove);
+        }
+        private void updateKing(Move currentMove)
+        {
+            if (m_playerTurn.getShapeChar() == 'X')
+            {
+                if (currentMove.endPosition.Row == 0)
+                {
+                    m_boardArray[currentMove.endPosition.Row,currentMove.endPosition.Col].Shape = new ShapeWrapper('K');
+                    m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].IsKing = true;
+                }
+            }
+            else // 'O'
+            {
+                if (currentMove.endPosition.Row == m_boardSize-1)
+                {
+                    m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape = new ShapeWrapper('U');
+                    m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].IsKing = true;
+                }
+            }
+
+        }
+        public bool checkGameOver()
+        {
+            char winnerShape;
+            return checkWin(out winnerShape) || checkDraw();
+        }
+
+        private bool checkDraw()
+        {
+            return false;
+        }
+
+        private bool checkWin(out char winnerShape)
+        {
+            // if winner is X winnerShape = 'X' , else if winner is O winnerShape is '0' ,else (no winner) winnerShape = ' '
+            bool xExists = false;
+            bool oExists = false;
+
+            for (int i = 0; i < m_boardSize; i++)
+            {
+                for (int j = 0; j < m_boardSize; j++)
+                {
+                    if (m_boardArray[i, j].Shape.getShapeChar() == 'X' || m_boardArray[i, j].Shape.getShapeChar() == 'K')
+                    {
+                        xExists = true;
+
+                    }
+                    if (m_boardArray[i, j].Shape.getShapeChar() == 'O' || m_boardArray[i, j].Shape.getShapeChar() == 'U')
+                    {
+                        oExists = true;
+
+                    }
+                }
+            }
+            if (xExists && !oExists)
+            {
+                winnerShape = 'X';
+                Console.WriteLine("X WIN");
+                return xExists;
+            }
+            else if (!xExists && oExists)
+            {
+                winnerShape = 'O';
+                Console.WriteLine("O WIN");
+                return oExists;
+            }
+            winnerShape = ' ';
+            return false;
         }
         private bool isStartPositionValid(Move currentMove)
         {
             char startPositionShape = m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape.getShapeChar();
+            if (startPositionShape == 'K')
+            {
+                startPositionShape = 'X';
+            }
+            else if (startPositionShape == 'U')
+            {
+                startPositionShape = 'O';
+            }
             if (startPositionShape != playerTurn.getShapeChar())
             {
                 return false;
@@ -106,7 +185,7 @@ namespace Ex02.Logic
             if (m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].IsKing)
             {
                 isEndPositionLegal = true;
-                if (currentMove.sender.shape.getShapeChar() == 'X')
+                if (m_playerTurn.getShapeChar() == 'X')
                 {
                     if (!isDiagonalUp(currentMove,1))
                     {
@@ -200,10 +279,9 @@ namespace Ex02.Logic
             }
             return true;
         }
-
-        //Checking if move is eating
         private bool checkIfPlayerMoveEating(Move currentMove)
         {
+            //Checking if move is eating
             bool isEating = false;
 
             int eatenRow = (currentMove.startPosition.Row + currentMove.endPosition.Row) /2;
@@ -214,7 +292,7 @@ namespace Ex02.Logic
             {
                 if (isDiagonalDown(currentMove, 2))
                 {
-                    if (m_boardArray[eatenRow,eatenCol].Shape.getShapeChar() == 'O')
+                    if ((m_boardArray[eatenRow,eatenCol].Shape.getShapeChar() == 'O')|| (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'U'))
                     isEating = true;
                 }
             }
@@ -222,7 +300,7 @@ namespace Ex02.Logic
             {
                 if (isDiagonalUp(currentMove, 2))
                 {
-                    if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'X')
+                    if ((m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'X')|| m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'K')
                     isEating = true;
                 }
             }
@@ -232,17 +310,17 @@ namespace Ex02.Logic
             {
                 if (m_playerTurn.getShapeChar() == 'X')
                 {
-                    if (!isDiagonalDown(currentMove, 2))
+                    if (isDiagonalUp(currentMove, 2))
                     {
-                        if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'O')
+                        if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'O'|| m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'U')
                             isEating = true;
                     }
                 }
                 else // 'O'
                 {
-                    if (!isDiagonalUp(currentMove, 2))
+                    if (isDiagonalDown(currentMove, 2))
                     {
-                        if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'X')
+                        if (m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'X' || m_boardArray[eatenRow, eatenCol].Shape.getShapeChar() == 'K')
                             isEating = true;
                     }
                 }
@@ -266,15 +344,15 @@ namespace Ex02.Logic
             {
                 for (int j = 0; j < m_boardSize; j++)
                 {
-                    if (m_boardArray[i, j].Shape.getShapeChar() == 'X')
+                    if (m_boardArray[i, j].Shape.getShapeChar() == 'X' || m_boardArray[i, j].Shape.getShapeChar() == 'K')
                     {
-                        if ((i - 2 >= 0 ) && (j - 2 >=0) && (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'O')
+                        if ((i - 2 >= 0 ) && (j - 2 >=0) && ((m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'O')|| (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'U'))
                             &&
                            (m_boardArray[i - 2, j - 2].Shape.getShapeChar() == ' '))
                         {
                             return true;
                         }
-                        else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'O')
+                        else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && ((m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'O')|| (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'U'))
                                 &&
                                 (m_boardArray[i - 2, j+2].Shape.getShapeChar() == ' ')) 
                         {
@@ -282,13 +360,13 @@ namespace Ex02.Logic
                         }
                         if (m_boardArray[i, j].IsKing == true)
                         {
-                            if ((i + 2 < m_boardSize) && (j - 2 >= 0) && (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'O')
+                            if ((i + 2 < m_boardSize) && (j - 2 >= 0) && ((m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'O')|| (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'U'))
                              &&
                                 (m_boardArray[i + 2, j - 2].Shape.getShapeChar() == ' '))
                             {
                                 return true;
                             }
-                            else if ((i +2 < m_boardSize) && (j + 2 < m_boardSize) && (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'O')
+                            else if ((i +2 < m_boardSize) && (j + 2 < m_boardSize) && ((m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'O')|| (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'U'))
                                     &&
                                     (m_boardArray[i + 2, j + 2].Shape.getShapeChar() == ' '))
                             {
@@ -306,15 +384,15 @@ namespace Ex02.Logic
             {
                 for (int j = 0; j < m_boardSize; j++)
                 {
-                    if (m_boardArray[i, j].Shape.getShapeChar() == 'O')
+                    if ((m_boardArray[i, j].Shape.getShapeChar() == 'O')|| (m_boardArray[i, j].Shape.getShapeChar() == 'U'))
                     {
-                        if ((i + 2 < m_boardSize) && (j - 2 >= 0) && (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'X')
+                        if ((i + 2 < m_boardSize) && (j - 2 >= 0) && ((m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'X')|| (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'K'))
                             &&
                                (m_boardArray[i + 2, j - 2].Shape.getShapeChar() == ' '))
                         {
                             return true;
                         }
-                        else if ((i + 2 < m_boardSize) && (j + 2 < m_boardSize) && (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'X')
+                        else if ((i + 2 < m_boardSize) && (j + 2 < m_boardSize) && ((m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'X')|| (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'K'))
                                 &&
                                 (m_boardArray[i + 2, j + 2].Shape.getShapeChar() == ' '))
                         {
@@ -323,13 +401,13 @@ namespace Ex02.Logic
 
                         if (m_boardArray[i, j].IsKing == true)
                         {
-                            if ((i - 2 >= 0) && (j - 2 >= 0) && (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'X')
+                            if ((i - 2 >= 0) && (j - 2 >= 0) && ((m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'X')|| (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'K'))
                              &&
                             (m_boardArray[i - 2, j - 2].Shape.getShapeChar() == ' '))
                             {
                                 return true;
                             }
-                            else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'X')
+                            else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && ((m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'X')|| (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'K'))
                                     &&
                                     (m_boardArray[i - 2, j + 2].Shape.getShapeChar() == ' '))
                             {
@@ -340,10 +418,6 @@ namespace Ex02.Logic
                 }
             }
             return false;
-        }
-
-
-
-      
+        }     
     }
 }
