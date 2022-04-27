@@ -105,6 +105,7 @@ namespace Ex02.ConsoleUserInterface
         private void turnPlaying(ref bool io_finished, ref bool io_keepPlaying)
         {
             bool moveIlegal;
+            bool quit = true;
             while (io_keepPlaying)
             {
                 // is there eating before move
@@ -113,6 +114,7 @@ namespace Ex02.ConsoleUserInterface
                 io_finished = checkIfUserQuit();
                 if (io_finished)
                 {
+                    m_game.currentState.CheckGameOver(quit);
                     switchTurn();
                     if (m_playerTurn.getShapeChar() == 'X')
                     {
@@ -126,7 +128,9 @@ namespace Ex02.ConsoleUserInterface
                     {
                         io_finished = false;
                         io_keepPlaying = true;
+                        switchTurn();
                         restartGame();
+                        m_messages.DisplayTurn(m_game.currentState.playerTurn, m_previousTurn);
                         continue;
                     }
                     break;
@@ -147,7 +151,14 @@ namespace Ex02.ConsoleUserInterface
                 }
             }
             // Check if the game has ended
-            io_finished = m_game.currentState.CheckGameOver();
+            if (m_messages.CurrentMove == "Q")
+            {
+                io_finished = m_game.currentState.CheckGameOver(quit);
+            }
+            else
+            {
+                io_finished = m_game.currentState.CheckGameOver(!quit);
+            }
         }
 
         private bool checkIfUserQuit()
@@ -380,7 +391,11 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
         private bool isUserMoveValid(string move) //Not finished!!
         {
             // string
-            if (m_messages.CurrentMove.Length != 5)
+            if (m_messages.CurrentMove == "Q")
+            {
+                return true;
+            }
+            else if (m_messages.CurrentMove.Length != 5)
             {
                 m_messages.PrintInvalidInput();
                 return false;
@@ -409,10 +424,6 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
             {
                 m_messages.PrintInvalidInput();
                 return false;
-            }
-            else if (m_messages.CurrentMove[0] == 'Q')
-            {
-                return true;
             }
             else
             {

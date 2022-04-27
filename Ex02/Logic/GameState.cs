@@ -227,12 +227,12 @@ namespace Ex02.Logic
 
         }
 
-        public bool CheckGameOver()
+        public bool CheckGameOver(bool quit)
         {
-            return checkWin();
+            return checkWin(quit);
         }
 
-        private bool checkWin()
+        private bool checkWin(bool quit)
         {
             // if winner is X winnerShape = 'X' , else if winner is O winnerShape is '0' ,else (no winner) winnerShape = ' '
             bool xExists = false;
@@ -276,6 +276,12 @@ namespace Ex02.Logic
             {
                 m_oScore += oScore;
                 return oExists;
+            }
+            else if ((xExists && oExists)&&quit)
+            {
+                m_xScore += xScore;
+                m_oScore += oScore;
+                return true;
             }
             return false;
         }

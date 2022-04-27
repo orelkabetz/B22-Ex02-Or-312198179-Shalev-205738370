@@ -40,6 +40,7 @@ namespace Ex02.Logic
 
         public void MakeComputerTurn(ref bool io_finished, ref bool io_keepPlaying, out string o_moveString)
         {
+            bool quit = true;
             string o_localMoveString = " ";
             while (io_keepPlaying)
             {
@@ -54,7 +55,7 @@ namespace Ex02.Logic
             }
             o_moveString = o_localMoveString;
             // Check if the game has ended
-            io_finished = currentState.CheckGameOver();
+            io_finished = currentState.CheckGameOver(!quit);
         } 
         
         private void makeComputerMove(out string o_moveString)

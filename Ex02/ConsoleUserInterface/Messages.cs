@@ -12,6 +12,7 @@ namespace Ex02.ConsoleUserInterface
         private string m_playerTwoName;
         private int m_boardSize;
         private int m_oneOrTwoPlayers;
+        private int m_rounds = 0;
         private string m_currentMove;
         private string m_previousMove;
 
@@ -137,6 +138,7 @@ Would you like to start a new game?
 
         public void Restart()
         {
+            m_rounds++;
             Screen.Clear();
             string restart = string.Format(
 @"
@@ -267,9 +269,12 @@ Please try again: ");
             // Print a message to the user which one's turn, and to make a move
             if ((playerTurn.getShapeChar() == 'X') && (previousTurn.getShapeChar() == 'O'))
             {
-                if (m_previousMove != null)
+                if (m_rounds != 0)
                 {
-                    Console.WriteLine(PlayerTwoName + "'s move was ({0}): " + m_previousMove, previousTurn.getShapeChar());
+                    if (PreviousMove != "Q")
+                    {
+                        Console.WriteLine(PlayerTwoName + "'s move was ({0}): " + m_previousMove, previousTurn.getShapeChar());
+                    }
                 }
                 Console.WriteLine(PlayerOneName + "'s turn : ({0})", playerTurn.getShapeChar());
             }
