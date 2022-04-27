@@ -235,8 +235,7 @@ Would you like to start a new game?
         public void PrintExtraTurn()
         {
             string extraTurn = string.Format(
-@"
-You have extra turn, please play:
+@"You have extra turn, please play:
 ");
             Console.WriteLine(extraTurn);
         }
