@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Ex02.Logic;
 using Ex02.ConsoleUtils;
 
@@ -13,90 +10,144 @@ namespace Ex02.ConsoleUserInterface
         Messages m_messages;
         private ShapeWrapper m_playerTurn;
         private ShapeWrapper m_previousTurn;
+
         public Controller()
         {
             m_messages = new Messages();
             m_playerTurn = new ShapeWrapper('X');
             m_previousTurn = new ShapeWrapper('O');
         }
+
         public void Run() // Maybe should be static and not object referenced
         {
-            bool finished = false;
-            bool keepPlaying = true;
+            bool io_finished = false;
+            bool io_keepPlaying = true;
             string o_moveString;
-            m_messages.start();
-            createNewGame(m_messages.BoardSize, m_messages.PlayerOneName, m_messages.PlayerTwoName);
+            m_messages.Start();
+            CreateNewGame(m_messages.BoardSize, m_messages.PlayerOneName, m_messages.PlayerTwoName);
             printBoard();
-            while (!finished) // נצטרך לעשות בדיקה אם לא נגמר בכל סוף תור
+            while (!io_finished) 
             {
                 
                 //turn 1
-                m_messages.displayTurn(m_game.currentState.playerTurn, m_previousTurn);
-                turnPlaying(ref finished, ref keepPlaying);
-                if (finished)
+                m_messages.DisplayTurn(m_game.currentState.playerTurn, m_previousTurn);
+                turnPlaying(ref io_finished, ref io_keepPlaying);
+                if (io_finished)
                 {
-                  m_messages.displayWinner(m_playerTurn);
-                  break;
+                    if (m_playerTurn.getShapeChar() == 'X')
+                    {
+                        m_messages.DisplayWinner(m_playerTurn, m_game.currentState.xScore);
+                    }
+                    else
+                    {
+                        m_messages.DisplayWinner(m_playerTurn, m_game.currentState.oScore);
+                    }
+                    if (m_messages.CheckRestartGame())
+                    {
+                        io_finished = false;
+                        io_keepPlaying = true;
+                        restartGame();
+                        continue;
+                    }
+                    break;
                 }
                 //between turn 1 and turn 2
                 switchTurn();
                 //init keepPlaying to true before turn 2
-                keepPlaying = true;
+                io_keepPlaying = true;
 
                 //turn 2
-                m_messages.displayTurn(m_game.currentState.playerTurn, m_previousTurn);
+                m_messages.DisplayTurn(m_game.currentState.playerTurn, m_previousTurn);
                 if (m_messages.OneOrTwoPlayers == 2)
                 {
-                    turnPlaying(ref finished, ref keepPlaying);
+                    turnPlaying(ref io_finished, ref io_keepPlaying);
                 }
                 else
                 {
-                    m_game.makeComputerTurn(ref finished, ref keepPlaying, out o_moveString);
+                    m_game.MakeComputerTurn(ref io_finished, ref io_keepPlaying, out o_moveString);
                     m_messages.CurrentMove = o_moveString;
                     printBoard();
                 }
                 // finished turn 1 and turn 2 
                 //init keepPlaying to true before turn 1
-                keepPlaying = true;
+                io_keepPlaying = true;
                 switchTurn();
-                if (finished)
+                if (io_finished)
                 {
-                    m_messages.displayWinner(m_playerTurn);
+                    if (m_playerTurn.getShapeChar() == 'X')
+                    {
+                        m_messages.DisplayWinner(m_playerTurn, m_game.currentState.xScore);
+                    }
+                    else
+                    {
+                        m_messages.DisplayWinner(m_playerTurn, m_game.currentState.oScore);
+                    }
+                    if (m_messages.CheckRestartGame())
+                    {
+                        io_finished = false;
+                        io_keepPlaying = true;
+                        restartGame();
+                        continue;
+                    }
                 }
             }
         }
 
-        private void turnPlaying(ref bool finished, ref bool keepPlaying)
+        private void restartGame()
+        {
+            m_messages.Restart();
+            System.Threading.Thread.Sleep(2000);
+            // init the board to initial state
+            intializeBoard(m_messages.BoardSize);
+            printBoard();
+        }
+
+        private void turnPlaying(ref bool io_finished, ref bool io_keepPlaying)
         {
             bool moveIlegal;
-            while (keepPlaying)
+            while (io_keepPlaying)
             {
                 // is there eating before move
-                keepPlaying = m_game.currentState.IsEatingPossible();
+                io_keepPlaying = m_game.currentState.IsEatingPossible();
                 setUserMove();
-                finished = checkIfUserQuit();
-                if (finished)
+                io_finished = checkIfUserQuit();
+                if (io_finished)
                 {
                     switchTurn();
-                    m_messages.displayWinner(m_playerTurn);
+                    if (m_playerTurn.getShapeChar() == 'X')
+                    {
+                        m_messages.DisplayWinner(m_playerTurn, m_game.currentState.xScore);
+                    }
+                    else
+                    {
+                        m_messages.DisplayWinner(m_playerTurn, m_game.currentState.oScore);
+                    }
+                    if (m_messages.CheckRestartGame())
+                    {
+                        io_finished = false;
+                        io_keepPlaying = true;
+                        restartGame();
+                        continue;
+                    }
                     break;
                 }
-                moveIlegal = m_game.makeMove(m_messages.CurrentMove, m_playerTurn);
+                moveIlegal = m_game.MakeMove(m_messages.CurrentMove, m_playerTurn);
                 printBoard();
                 if (!moveIlegal)
                 {
-                    m_messages.printInvalidLogicInput();
-                    keepPlaying = true;
+                    m_messages.PrintInvalidLogicInput();
+                    io_keepPlaying = true;
                     continue;
                 }
                 // is there eating after move
-                if (keepPlaying)
+                if (io_keepPlaying)
                 {
-                    keepPlaying = m_game.currentState.IsEatingPossible();
+                    io_keepPlaying = m_game.currentState.IsEatingPossible();
+                    m_messages.PrintExtraTurn();
                 }
             }
             // Check if the game has ended
-            finished = m_game.currentState.CheckGameOver();
+            io_finished = m_game.currentState.CheckGameOver();
         }
 
         private bool checkIfUserQuit()
@@ -107,17 +158,20 @@ namespace Ex02.ConsoleUserInterface
             }
             return false;
         }
-        public void createNewGame(int boardSize, string playerOneName, string playerTwoName)
+
+        public void CreateNewGame(int boardSize, string playerOneName, string playerTwoName)
         {
             m_game = new Game(boardSize, playerOneName, playerTwoName);
             intializeBoard(boardSize);
         }
+
         private void intializeBoard(int boardSize)
         {
             genereateOPieces(boardSize);
             generateEPieces(boardSize);
             genereateXPieces(boardSize);
         }
+
         private void genereateOPieces(int boardSize)
         {
             for (int i = 0; i < (boardSize / 2) - 1; i++)
@@ -150,10 +204,12 @@ namespace Ex02.ConsoleUserInterface
                 }
             }
         }
+
         private Piece generateNewOPiece()
         {
             return new Piece(new ShapeWrapper('O'));
         }
+
         private void generateEPieces(int boardSize)
         {
             for (int i = (boardSize / 2) - 1; i < (boardSize / 2) + 1; i++)
@@ -164,13 +220,15 @@ namespace Ex02.ConsoleUserInterface
                 }
             }
         }
+
         private Piece generateNewEmptyPiece()
         {
             return new Piece(new ShapeWrapper(' '));
         }
+
         private void genereateXPieces(int boardSize)
         {
-            for (int i = (boardSize / 2) +1; i < boardSize; i++)
+            for (int i = (boardSize / 2) + 1; i < boardSize; i++)
             {
                 for (int j = 0; j < boardSize; j++)
                 {
@@ -200,14 +258,16 @@ namespace Ex02.ConsoleUserInterface
                 }
             }
         }
+
         private Piece generateNewXPiece()
         {
             return new Piece(new ShapeWrapper('X'));
         }
+
         private void printBoard()
         {
             Screen.Clear();
-            object[] printableArray = createPrintableArray();
+            object[] printableArray = CreatePrintableArray();
             string board6 = string.Format(
 @"   A   B   C   D   E   F  
 =========================
@@ -284,19 +344,22 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
             }
             //Console.WriteLine(board6);
         }
-        public object[] createPrintableArray()
+
+        public object[] CreatePrintableArray()
         {
+            const int maxSize = 10;
            // object[] o_printableArray = new object[m_messages.BoardSize * m_messages.BoardSize];
-            object[] o_printableArray = new object[10*10]; // need to define MAX
+            object[] o_printableArray = new object[maxSize * maxSize]; // need to define MAX
             for (int i = 0; i < m_messages.BoardSize; i++)
             {
                 for (int j = 0; j < m_messages.BoardSize; j++)
                 {
-                    o_printableArray[i* m_messages.BoardSize + j] = m_game.currentState.BoardArray[i,j].Shape.getShapeChar();
+                    o_printableArray[i * m_messages.BoardSize + j] = m_game.currentState.BoardArray[i,j].Shape.getShapeChar();
                 }
             }
             return o_printableArray;
         }
+
         private void setUserMove()
         {
             m_messages.CurrentMove = Console.ReadLine();
@@ -307,25 +370,55 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
                     Screen.Clear();
                     printBoard();
                     System.Console.SetCursorPosition(0, m_messages.BoardSize+2);
-                    m_messages.printInvalidInput();
+                    m_messages.PrintInvalidInput();
                     m_messages.CurrentMove = Console.ReadLine();
                 }
             }
         }
+
         private bool isUserMoveValid(string move) //Not finished!!
         {
             // string
             if (m_messages.CurrentMove.Length != 5)
             {
-                Console.WriteLine("NO");
+                m_messages.PrintInvalidInput();
                 return false;
+            }
+            else if (m_messages.CurrentMove[2] != '>')
+            {
+                m_messages.PrintInvalidInput();
+                return false;
+            }
+            else if ((m_messages.CurrentMove[0] < 'A') || (m_messages.CurrentMove[0] > m_messages.BoardSize + 'A'))
+            {
+                m_messages.PrintInvalidInput();
+                return false;
+            }
+            else if ((m_messages.CurrentMove[3] < 'A') || (m_messages.CurrentMove[3] > m_messages.BoardSize + 'A'))
+            {
+                m_messages.PrintInvalidInput();
+                return false;
+            }
+            else if ((m_messages.CurrentMove[1] < 'a') || (m_messages.CurrentMove[1] > m_messages.BoardSize + 'a'))
+            {
+                m_messages.PrintInvalidInput();
+                return false;
+            }
+            else if ((m_messages.CurrentMove[4] < 'a') || (m_messages.CurrentMove[4] > m_messages.BoardSize + 'a'))
+            {
+                m_messages.PrintInvalidInput();
+                return false;
+            }
+            else if (m_messages.CurrentMove[0] == 'Q')
+            {
+                return true;
             }
             else
             {
-                Console.WriteLine("YES");
                 return true;
             }
         }
+
         private void switchTurn()
         {
             if (m_playerTurn.getShapeChar() == 'X')

@@ -14,44 +14,84 @@ namespace Ex02.ConsoleUserInterface
         private int m_oneOrTwoPlayers;
         private string m_currentMove;
         private string m_previousMove;
+
         public string PlayerOneName
         {
             get { return m_playerOneName; }
             set { m_playerOneName = value; }
         }
+
         public string PlayerTwoName
         {
             get { return m_playerTwoName; }
             set { m_playerTwoName = value; }
         }
+
         public int BoardSize
         {
             get { return m_boardSize; }
             set { m_boardSize = value; }
         }
+
         public int OneOrTwoPlayers
         {
             get { return m_oneOrTwoPlayers; }
             set { m_oneOrTwoPlayers = value; }
         }
+
         public string CurrentMove
         {
             get { return m_currentMove; }
             set { m_currentMove = value; }
         }
+
         public string PreviousMove
         {
             get { return m_previousMove; }
             set { m_previousMove = value; }
         }
-        public void start()
+
+        public void Start()
         {
-            printHello();
+            Screen.Clear();
+            PrintHello();
             defineSettings();
-            //Console.WriteLine("BYE!");
-            //Console.ReadLine();
         }
-        private void printHello()
+
+        public bool CheckRestartGame()
+        {
+            bool whileFlag = true;
+            string userDecision;
+            string restart = string.Format(
+@"
+Would you like to start a new game?
+        Y - for yes
+        N - for no
+");
+            Console.WriteLine(restart);
+            while (whileFlag)
+            {
+                userDecision = Console.ReadLine();
+                if (userDecision == "Y")
+                {
+                    return true;
+                }
+                else if (userDecision == "N")
+                {
+                    PrintBye();
+                    return false;
+                }
+                else
+                {
+                    Screen.Clear();
+                    Console.WriteLine(restart);
+                    continue;
+                }
+            }
+            return false;
+        }
+
+        public void PrintHello()
         {
             string hello = string.Format(
 @"
@@ -59,7 +99,8 @@ namespace Ex02.ConsoleUserInterface
         # CHECKERS #");
             Console.WriteLine(hello);
         }
-        public void displayWinner(ShapeWrapper playerTurn)
+
+        public void DisplayWinner(ShapeWrapper playerTurn, int score)
         {
             string winnerName;
             if (playerTurn.getShapeChar() == 'X')
@@ -71,27 +112,63 @@ namespace Ex02.ConsoleUserInterface
                 winnerName = m_playerTwoName;
             }
             string winner = string.Format(
-@"
-    The Winner is:
-        {0}", winnerName);
+@"     The Winner is:
+            {0}
+     with a score of: {1}"
+, winnerName, score);
             Console.WriteLine(winner);
         }
+
+        public void PrintBye()
+        {
+            Screen.Clear();
+            string hello = string.Format(
+@"
+            Bye Bye!!");
+            Console.WriteLine(hello);
+        }
+
         private void defineSettings()
         {
             m_playerOneName = getNameFromUser();
             getSize();
             getOneOrTwoPlayers();
         }
+
+        public void Restart()
+        {
+            Screen.Clear();
+            string restart = string.Format(
+@"
+      Another round of:
+        # CHECKERS #");
+            Console.WriteLine(restart);
+        }
+
         private string getNameFromUser()
         {
+            bool whileFlag = true; ;
+            string name = " ";
         string getNameMessage = string.Format(
 @"
     Please Enter Your Name:
 ");
             Console.WriteLine(getNameMessage);
             System.Console.SetCursorPosition(10, 5);
-            return Console.ReadLine();
+            while (whileFlag)
+            { 
+                name = Console.ReadLine();
+                if (name.Length >= 20)
+                {
+                    Console.WriteLine("The name should be up to 20 characters, try again");
+                    System.Console.SetCursorPosition(10, 8);
+                    continue;
+                }
+                whileFlag = false;
+            }
+            return name;
         }
+
         private void getSize()
         {
             string getSizeMessage = string.Format(
@@ -105,11 +182,11 @@ namespace Ex02.ConsoleUserInterface
             Screen.Clear();
             Console.WriteLine(getSizeMessage);
             System.Console.SetCursorPosition(17, 7);
-            //m_boardSize = Int32.Parse(Console.ReadLine());
             Int32.TryParse(Console.ReadLine(), out m_boardSize);
             convertChoiceToActualSize();
             return;
         }
+
         private void convertChoiceToActualSize()
         {
             if (m_boardSize == 1)
@@ -125,6 +202,7 @@ namespace Ex02.ConsoleUserInterface
                 m_boardSize = 10;
             }    
         }
+
         private void getOneOrTwoPlayers()
         {
             string getPlayersNumberMessage = string.Format(
@@ -137,7 +215,6 @@ namespace Ex02.ConsoleUserInterface
             Screen.Clear();
             Console.WriteLine(getPlayersNumberMessage);
             System.Console.SetCursorPosition(17, 6);
-           // m_oneOrTwoPlayers = Int32.Parse(Console.ReadLine());
             Int32.TryParse(Console.ReadLine(), out m_oneOrTwoPlayers);
             if (m_oneOrTwoPlayers == 2)
             {
@@ -154,7 +231,17 @@ namespace Ex02.ConsoleUserInterface
             }
             return;
         }
-        public void printInvalidInput()
+
+        public void PrintExtraTurn()
+        {
+            string extraTurn = string.Format(
+@"
+You have extra turn, please play:
+");
+            Console.WriteLine(extraTurn);
+        }
+
+        public void PrintInvalidInput()
         {
             string invalid = string.Format(
 @"
@@ -164,7 +251,8 @@ Please try again: ");
             System.Console.SetCursorPosition(0, BoardSize*2+1);
             Console.WriteLine(invalid);
         }
-        public void printInvalidLogicInput()
+
+        public void PrintInvalidLogicInput()
         {
             string invalid = string.Format(
 @"
@@ -173,7 +261,8 @@ Please try again: ");
             System.Console.SetCursorPosition(0, BoardSize * 2 + 1);
             Console.WriteLine(invalid);
         }
-        public void displayTurn(ShapeWrapper playerTurn, ShapeWrapper previousTurn)
+
+        public void DisplayTurn(ShapeWrapper playerTurn, ShapeWrapper previousTurn)
         {
            PreviousMove = CurrentMove;
             // Print a message to the user which one's turn, and to make a move

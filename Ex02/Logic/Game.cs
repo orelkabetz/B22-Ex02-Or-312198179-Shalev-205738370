@@ -13,12 +13,13 @@ namespace Ex02.Logic
             get { return m_currentState; }
             set { m_currentState = value; }
         }
+
         public Game(int boardSize, string playerOneName, string playerTwoName)
         {
             m_currentState = new GameState(boardSize);
         }
 
-        public bool makeMove(string m_currentMove, ShapeWrapper playerTurn)
+        public bool MakeMove(string m_currentMove, ShapeWrapper playerTurn)
         {
             Move currentMove;
             if (m_currentState.playerTurn.getShapeChar() == 'X')
@@ -37,23 +38,23 @@ namespace Ex02.Logic
             return false;
         }
 
-        public void makeComputerTurn(ref bool finished, ref bool keepPlaying, out string o_moveString)
+        public void MakeComputerTurn(ref bool io_finished, ref bool io_keepPlaying, out string o_moveString)
         {
             string o_localMoveString = " ";
-            while (keepPlaying)
+            while (io_keepPlaying)
             {
                 // is there eating before move
-                keepPlaying = currentState.IsEatingPossible();
+                io_keepPlaying = currentState.IsEatingPossible();
                 makeComputerMove(out o_localMoveString);
                 // is there eating after move
-                if (keepPlaying)
+                if (io_keepPlaying)
                 {
-                    keepPlaying = currentState.IsEatingPossible();
+                    io_keepPlaying = currentState.IsEatingPossible();
                 }
             }
             o_moveString = o_localMoveString;
             // Check if the game has ended
-            finished = currentState.CheckGameOver();
+            io_finished = currentState.CheckGameOver();
         } 
         
         private void makeComputerMove(out string o_moveString)

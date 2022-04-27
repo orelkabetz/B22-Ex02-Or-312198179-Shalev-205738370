@@ -9,6 +9,7 @@ namespace Ex02.Logic
     {
         private Position m_startPosition;
         private Position m_endPosition;
+
         public Move(string move)
         {
             char startCol = move[0];
@@ -18,16 +19,19 @@ namespace Ex02.Logic
             m_startPosition = new Position(startRow - 'a', startCol - 'A');
             m_endPosition = new Position(endRow - 'a', endCol - 'A');
         }
+
         public Move(Position startPosition, Position endPosition)
         {
             m_startPosition = startPosition;
             m_endPosition = endPosition;
         }
+
         public Position startPosition
         {
             get { return m_startPosition; }
             set { m_startPosition = value; }
         }
+
         public Position endPosition
         {
             get { return m_endPosition; }

@@ -7,12 +7,14 @@ namespace Ex02.Logic
 {
     public class GameState
     {
-        private GameState m_previous, m_next;
         private ShapeWrapper m_playerTurn;
         private int m_boardSize;
         private Piece[,] m_boardArray;
         private List<Move> m_possibleComputerMoves;
         private List<Move> m_possibleComputerEatingMoves;
+        private int m_xScore = 0;
+        private int m_oScore = 0;
+
         public GameState(int size)
         {
             m_boardSize = size;
@@ -21,26 +23,43 @@ namespace Ex02.Logic
             m_possibleComputerMoves = new List<Move>();
             m_possibleComputerEatingMoves = new List<Move>();
         }
+
         public Piece[,] BoardArray
         { 
             get { return m_boardArray; } 
             set { m_boardArray = value; }
         }
+
         public List<Move> PossibleComputerMoves
         {
             get { return m_possibleComputerMoves; }
             set { m_possibleComputerMoves = value; }
         }
+
         public List<Move> PossibleComputerEatingMoves
         {
             get { return m_possibleComputerEatingMoves; }
             set { m_possibleComputerEatingMoves = value; }
         }
+
         public ShapeWrapper playerTurn
         {
             get { return m_playerTurn; }
             set { m_playerTurn = value; }
         }
+
+        public int xScore
+        {
+            get { return m_xScore; }
+            set { m_xScore = value; }
+        }
+
+        public int oScore
+        {
+            get { return m_oScore; }
+            set { m_oScore = value; }
+        }
+
         public void SwitchTurn()
         {
             if (m_playerTurn.getShapeChar() == 'X')
@@ -52,6 +71,7 @@ namespace Ex02.Logic
                 m_playerTurn.Shape = ShapeWrapper.eShape.X;
             }
         }
+
         public bool CheckMove(Move currentMove)
         {
             // Check if the start or end position is in the same row/col - not possible
@@ -60,11 +80,11 @@ namespace Ex02.Logic
             {
                 return false;
             }
-            if(!isStartPositionValid(currentMove)) //האם יש שחקן, האם השחקן הוא של הפלייר הנוכחי
+            if(!isStartPositionValid(currentMove)) 
             {
                 return false;
             }
-            if (!isEndPositionValid(currentMove)) // האם המשבצת פנויה, האם הוא במרחק של קפיצה אחת מהסטרט, בתוך הפונקציה נבדוק האם מלך
+            if (!isEndPositionValid(currentMove))
             {
                 return false;
             }
@@ -80,8 +100,8 @@ namespace Ex02.Logic
                 m_possibleComputerMoves.Clear();
                 setPossibleMoves();
             }
-
         }
+
         private void setPossibleMoves()
         {
             Move currentMove;
@@ -119,6 +139,7 @@ namespace Ex02.Logic
                 }
             }
         }
+
         private void setPossibleEating()
         {
             Move currentMove;
@@ -164,6 +185,7 @@ namespace Ex02.Logic
                 }
             }
         }
+
         public void PlayMove(Move currentMove)
         {
             int eatenRow;
@@ -183,6 +205,7 @@ namespace Ex02.Logic
             }
             updateKing(currentMove);
         }
+
         private void updateKing(Move currentMove)
         {
             if (m_playerTurn.getShapeChar() == 'X')
@@ -203,14 +226,12 @@ namespace Ex02.Logic
             }
 
         }
+
         public bool CheckGameOver()
         {
-            return checkWin() || checkDraw();
+            return checkWin();
         }
-        private bool checkDraw()
-        {
-            return false;
-        }
+
         private bool checkWin()
         {
             // if winner is X winnerShape = 'X' , else if winner is O winnerShape is '0' ,else (no winner) winnerShape = ' '
@@ -248,14 +269,17 @@ namespace Ex02.Logic
             }
             if (xExists && !oExists)
             {
+                m_xScore += xScore;
                 return xExists;
             }
             else if (!xExists && oExists)
             {
+                m_oScore += oScore;
                 return oExists;
             }
             return false;
         }
+
         private bool isStartPositionValid(Move currentMove)
         {
             char startPositionShape = m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape.getShapeChar();
@@ -273,6 +297,7 @@ namespace Ex02.Logic
             }
             return true;
         }
+
         private bool isEndPositionValid(Move currentMove)
         {
             bool isEndPositionLegal = true;
@@ -319,6 +344,7 @@ namespace Ex02.Logic
             }
             return isEndPositionLegal;
         }
+
         private bool isEndPositionEmpty(Move currentMove)
         {
             char endPositionShape = m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape.getShapeChar();
@@ -330,6 +356,7 @@ namespace Ex02.Logic
 
             return true;
         }
+
         private bool insideTheBoard(Move currentMove)
         {
             bool isStartPositionLegal = true;
@@ -352,18 +379,17 @@ namespace Ex02.Logic
             }
             return isStartPositionLegal && isEndPositionLegal;
         }
+
         private bool isDiagonalDown(Move currentMove, int stepSize)
         {
             if (stepSize == 1)
             {
                 if (IsEatingPossible())
                 {
-                    int x = 0;
-
                     return checkIfPlayerMoveEating(currentMove);
                 }
             }
-            //
+            
             if (currentMove.startPosition.Row != (currentMove.endPosition.Row + stepSize))
             {
                 return false;
@@ -375,13 +401,13 @@ namespace Ex02.Logic
             }
             return true;
         }
+
         private bool isDiagonalUp(Move currentMove, int stepSize)
         {
             if (stepSize == 1)
             {
                 if (IsEatingPossible())
                 {
-                    int x = 0;
                     return checkIfPlayerMoveEating(currentMove);
                 }
             }
@@ -396,6 +422,7 @@ namespace Ex02.Logic
             }
             return true;
         }
+
         private bool checkIfPlayerMoveEating(Move currentMove)
         {
             //Checking if move is eating
@@ -444,6 +471,7 @@ namespace Ex02.Logic
             }
             return isEating;
         }
+
         public bool IsEatingPossible()
         {
             if (m_playerTurn.getShapeChar() == 'X')
@@ -455,6 +483,7 @@ namespace Ex02.Logic
                 return isEatingPossibleForO();
             }
         }
+
         private bool isEatingPossibleForX()
         {
             for (int i = m_boardSize-1; i >= 0; i--)
@@ -495,6 +524,7 @@ namespace Ex02.Logic
             }
             return false;
         }
+
         private bool isEatingPossibleForO()
         {
             for (int i = m_boardSize-1; i >= 0; i--)
