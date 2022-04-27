@@ -9,8 +9,7 @@ namespace Ex02.Logic
     {
         private Position m_startPosition;
         private Position m_endPosition;
-        private Player m_sender;
-        public Move(string move, Player player)
+        public Move(string move)
         {
             char startCol = move[0];
             char startRow = move[1];
@@ -18,7 +17,11 @@ namespace Ex02.Logic
             char endRow = move[4];
             m_startPosition = new Position(startRow - 'a', startCol - 'A');
             m_endPosition = new Position(endRow - 'a', endCol - 'A');
-            m_sender = player;
+        }
+        public Move(Position startPosition, Position endPosition)
+        {
+            m_startPosition = startPosition;
+            m_endPosition = endPosition;
         }
         public Position startPosition
         {
@@ -30,11 +33,5 @@ namespace Ex02.Logic
             get { return m_endPosition; }
             set { m_endPosition = value; }
         }
-        public Player sender
-        {
-            get { return m_sender; }
-            set { m_sender = value; }
-        }
     }
-
 }

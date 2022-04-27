@@ -23,94 +23,82 @@ namespace Ex02.ConsoleUserInterface
         {
             bool finished = false;
             bool keepPlaying = true;
-            bool moveIlegal;
+            string o_moveString;
             m_messages.start();
             createNewGame(m_messages.BoardSize, m_messages.PlayerOneName, m_messages.PlayerTwoName);
             printBoard();
             while (!finished) // נצטרך לעשות בדיקה אם לא נגמר בכל סוף תור
             {
-                // תור 1
-                m_messages.PreviousMove = m_messages.CurrentMove;
+                
+                //turn 1
                 m_messages.displayTurn(m_game.currentState.playerTurn, m_previousTurn);
-                //keep turn player
-                while (keepPlaying)
-                {
-                    // is there eating before move
-                    keepPlaying = m_game.currentState.IsEatingPossible();
-                    setUserMove();
-                    finished = checkIfUserQuit();
-                    if (finished)
-                    {
-                        switchTurn();
-                        m_messages.displayWinner(m_playerTurn);
-                        break;
-                    }
-                    moveIlegal = m_game.makeMove(m_messages.CurrentMove, m_playerTurn);
-                    printBoard();
-                    if (!moveIlegal)
-                    {
-                        m_messages.printInvalidLogicInput();
-                        keepPlaying = true;
-                        continue;
-                    }
-                    // is there eating after move
-                    if (keepPlaying)
-                    {
-                        keepPlaying = m_game.currentState.IsEatingPossible();
-                    }
-                } 
-                // Check if the game has ended
-                finished = m_game.currentState.CheckGameOver();
+                turnPlaying(ref finished, ref keepPlaying);
                 if (finished)
                 {
-                    m_messages.displayWinner(m_playerTurn);
-                    break;
+                  m_messages.displayWinner(m_playerTurn);
+                  break;
                 }
-                
-
-                // להוסיף בדיקה אם יש עוד אכילה
-                // תור 2
+                //between turn 1 and turn 2
                 switchTurn();
+                //init keepPlaying to true before turn 2
                 keepPlaying = true;
-                m_messages.PreviousMove = m_messages.CurrentMove;
+
+                //turn 2
                 m_messages.displayTurn(m_game.currentState.playerTurn, m_previousTurn);
                 if (m_messages.OneOrTwoPlayers == 2)
                 {
-                    while (keepPlaying)
-                    {
-                        // is there eating before move
-                        keepPlaying = m_game.currentState.IsEatingPossible();
-                        setUserMove();
-                        moveIlegal = m_game.makeMove(m_messages.CurrentMove, m_playerTurn);
-                        printBoard();
-                        if (!moveIlegal)
-                        {
-                            m_messages.printInvalidLogicInput();
-                            keepPlaying = true;
-                            continue;
-                        }
-                        // is there eating after move
-                        if (keepPlaying)
-                        {
-                            // להוסיף הודעה על דאבל איטינג
-                            keepPlaying = m_game.currentState.IsEatingPossible();
-                        }
-                    }
+                    turnPlaying(ref finished, ref keepPlaying);
                 }
                 else
                 {
-                    // m_game.makeComputerMove();
+                    m_game.makeComputerTurn(ref finished, ref keepPlaying, out o_moveString);
+                    m_messages.CurrentMove = o_moveString;
                     printBoard();
                 }
+                // finished turn 1 and turn 2 
+                //init keepPlaying to true before turn 1
                 keepPlaying = true;
                 switchTurn();
-                finished = m_game.currentState.CheckGameOver();
                 if (finished)
                 {
                     m_messages.displayWinner(m_playerTurn);
                 }
             }
         }
+
+        private void turnPlaying(ref bool finished, ref bool keepPlaying)
+        {
+            bool moveIlegal;
+            while (keepPlaying)
+            {
+                // is there eating before move
+                keepPlaying = m_game.currentState.IsEatingPossible();
+                setUserMove();
+                finished = checkIfUserQuit();
+                if (finished)
+                {
+                    switchTurn();
+                    m_messages.displayWinner(m_playerTurn);
+                    break;
+                }
+                moveIlegal = m_game.makeMove(m_messages.CurrentMove, m_playerTurn);
+                printBoard();
+                if (!moveIlegal)
+                {
+                    m_messages.printInvalidLogicInput();
+                    keepPlaying = true;
+                    continue;
+                }
+                // is there eating after move
+                if (keepPlaying)
+                {
+                    keepPlaying = m_game.currentState.IsEatingPossible();
+                }
+            }
+            // Check if the game has ended
+            finished = m_game.currentState.CheckGameOver();
+        }
+
         private bool checkIfUserQuit()
         {
             if ((m_messages.CurrentMove == "Q")|| (m_messages.CurrentMove == "q"))
@@ -140,22 +128,22 @@ namespace Ex02.ConsoleUserInterface
                     {
                         if (j % 2 == 0)
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewEmptyPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewEmptyPiece();
                         }
                         else
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewOPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewOPiece();
                         }
                     }
                     else
                     {
                         if (j % 2 == 0)
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewOPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewOPiece();
                         }
                         else
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewEmptyPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewEmptyPiece();
                         }
 
                     }
@@ -172,7 +160,7 @@ namespace Ex02.ConsoleUserInterface
             {
                 for (int j = 0; j < boardSize; j++)
                 {
-                    m_game.currentState.boardArray[i, j] = generateNewEmptyPiece();
+                    m_game.currentState.BoardArray[i, j] = generateNewEmptyPiece();
                 }
             }
         }
@@ -190,22 +178,22 @@ namespace Ex02.ConsoleUserInterface
                     {
                         if (j % 2 == 0)
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewXPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewXPiece();
                         }
                         else
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewEmptyPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewEmptyPiece();
                         }
                     }
                     else
                     {
                         if (j % 2 == 0)
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewEmptyPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewEmptyPiece();
                         }
                         else
                         {
-                            m_game.currentState.boardArray[i, j] = generateNewXPiece();
+                            m_game.currentState.BoardArray[i, j] = generateNewXPiece();
                         }
 
                     }
@@ -304,7 +292,7 @@ j| {90} | {91} | {92} | {93} | {94} | {95} | {96} | {97} | {98} | {99} |
             {
                 for (int j = 0; j < m_messages.BoardSize; j++)
                 {
-                    o_printableArray[i* m_messages.BoardSize + j] = m_game.currentState.boardArray[i,j].Shape.getShapeChar();
+                    o_printableArray[i* m_messages.BoardSize + j] = m_game.currentState.BoardArray[i,j].Shape.getShapeChar();
                 }
             }
             return o_printableArray;

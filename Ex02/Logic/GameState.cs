@@ -11,16 +11,30 @@ namespace Ex02.Logic
         private ShapeWrapper m_playerTurn;
         private int m_boardSize;
         private Piece[,] m_boardArray;
-        public Piece[,] boardArray
-        { 
-            get { return m_boardArray; } 
-            set { m_boardArray = value; }
-        }
+        private List<Move> m_possibleComputerMoves;
+        private List<Move> m_possibleComputerEatingMoves;
         public GameState(int size)
         {
             m_boardSize = size;
             m_boardArray = new Piece[size, size];
             m_playerTurn = new ShapeWrapper('X');
+            m_possibleComputerMoves = new List<Move>();
+            m_possibleComputerEatingMoves = new List<Move>();
+        }
+        public Piece[,] BoardArray
+        { 
+            get { return m_boardArray; } 
+            set { m_boardArray = value; }
+        }
+        public List<Move> PossibleComputerMoves
+        {
+            get { return m_possibleComputerMoves; }
+            set { m_possibleComputerMoves = value; }
+        }
+        public List<Move> PossibleComputerEatingMoves
+        {
+            get { return m_possibleComputerEatingMoves; }
+            set { m_possibleComputerEatingMoves = value; }
         }
         public ShapeWrapper playerTurn
         {
@@ -55,6 +69,100 @@ namespace Ex02.Logic
                 return false;
             }
             return true;
+        }
+
+        public void SetAllComputerPossibleMoves()
+        {
+            m_possibleComputerEatingMoves.Clear();
+            setPossibleEating();
+            if (m_possibleComputerEatingMoves.Count == 0)
+            {
+                m_possibleComputerMoves.Clear();
+                setPossibleMoves();
+            }
+
+        }
+        private void setPossibleMoves()
+        {
+            Move currentMove;
+            for (int i = m_boardSize - 1; i >= 0; i--)
+            {
+                for (int j = 0; j < m_boardSize; j++)
+                {
+                    if ((m_boardArray[i, j].Shape.getShapeChar() == 'O') || (m_boardArray[i, j].Shape.getShapeChar() == 'U'))
+                    {
+                        if ((i + 1 < m_boardSize) && (j - 1 >= 0) && ((m_boardArray[i + 1, j - 1].Shape.getShapeChar() == ' '))) 
+                        {
+                            currentMove = new Move(new Position(i, j), new Position(i + 1, j - 1));
+                            m_possibleComputerMoves.Add(currentMove);
+                        }
+                        else if ((i + 1 < m_boardSize) && (j + 1 < m_boardSize) && ((m_boardArray[i + 1, j + 1].Shape.getShapeChar() == ' '))) 
+                        {
+                            currentMove = new Move(new Position(i, j), new Position(i + 1, j + 1));
+                            m_possibleComputerMoves.Add(currentMove);
+                        }
+
+                        if (m_boardArray[i, j].IsKing == true)
+                        {
+                            if ((i - 1 >= 0) && (j - 1 >= 0) && ((m_boardArray[i - 1, j - 1].Shape.getShapeChar() == ' ')))
+                            {
+                                currentMove = new Move(new Position(i, j), new Position(i - 1, j - 1));
+                                m_possibleComputerMoves.Add(currentMove);
+                            }
+                            else if ((i - 1 >= 0) && (j + 1 < m_boardSize) && ((m_boardArray[i - 1, j + 1].Shape.getShapeChar() == ' ')))
+                            {
+                                currentMove = new Move(new Position(i, j), new Position(i - 1, j + 1));
+                                m_possibleComputerMoves.Add(currentMove);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        private void setPossibleEating()
+        {
+            Move currentMove;
+            for (int i = m_boardSize - 1; i >= 0; i--)
+            {
+                for (int j = 0; j < m_boardSize; j++)
+                {
+                    if ((m_boardArray[i, j].Shape.getShapeChar() == 'O') || (m_boardArray[i, j].Shape.getShapeChar() == 'U'))
+                    {
+                        if ((i + 2 < m_boardSize) && (j - 2 >= 0) && ((m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'X') || (m_boardArray[i + 1, j - 1].Shape.getShapeChar() == 'K'))
+                            &&
+                               (m_boardArray[i + 2, j - 2].Shape.getShapeChar() == ' '))
+                        {
+                            currentMove = new Move(new Position(i, j), new Position(i + 2, j - 2));
+                            m_possibleComputerEatingMoves.Add(currentMove);
+                        }
+                        else if ((i + 2 < m_boardSize) && (j + 2 < m_boardSize) && ((m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'X') || (m_boardArray[i + 1, j + 1].Shape.getShapeChar() == 'K'))
+                                &&
+                                (m_boardArray[i + 2, j + 2].Shape.getShapeChar() == ' '))
+                        {
+                            currentMove = new Move(new Position(i, j), new Position(i + 2, j + 2));
+                            m_possibleComputerEatingMoves.Add(currentMove);
+                        }
+
+                        if (m_boardArray[i, j].IsKing == true)
+                        {
+                            if ((i - 2 >= 0) && (j - 2 >= 0) && ((m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'X') || (m_boardArray[i - 1, j - 1].Shape.getShapeChar() == 'K'))
+                             &&
+                            (m_boardArray[i - 2, j - 2].Shape.getShapeChar() == ' '))
+                            {
+                                currentMove = new Move(new Position(i, j), new Position(i - 2, j - 2));
+                                m_possibleComputerEatingMoves.Add(currentMove);
+                            }
+                            else if ((i - 2 >= 0) && (j + 2 < m_boardSize) && ((m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'X') || (m_boardArray[i - 1, j + 1].Shape.getShapeChar() == 'K'))
+                                    &&
+                                    (m_boardArray[i - 2, j + 2].Shape.getShapeChar() == ' '))
+                            {
+                                currentMove = new Move(new Position(i, j), new Position(i - 2, j + 2));
+                                m_possibleComputerEatingMoves.Add(currentMove);
+                            }
+                        }
+                    }
+                }
+            }
         }
         public void PlayMove(Move currentMove)
         {
@@ -107,20 +215,35 @@ namespace Ex02.Logic
         {
             // if winner is X winnerShape = 'X' , else if winner is O winnerShape is '0' ,else (no winner) winnerShape = ' '
             bool xExists = false;
+            int xScore = 0;
             bool oExists = false;
+            int oScore = 0;
 
             for (int i = 0; i < m_boardSize; i++)
             {
                 for (int j = 0; j < m_boardSize; j++)
                 {
-                    if (m_boardArray[i, j].Shape.getShapeChar() == 'X' || m_boardArray[i, j].Shape.getShapeChar() == 'K')
+                    if (m_boardArray[i, j].Shape.getShapeChar() == 'X')
                     {
+                        xScore += 1;
                         xExists = true;
                     }
-                    if (m_boardArray[i, j].Shape.getShapeChar() == 'O' || m_boardArray[i, j].Shape.getShapeChar() == 'U')
+                    else if (m_boardArray[i, j].Shape.getShapeChar() == 'K')
                     {
+                        xScore += 4;
+                        xExists = true;
+                    }
+                    else if (m_boardArray[i, j].Shape.getShapeChar() == 'O')
+                    {
+                        oScore += 1;
                         oExists = true;
                     }
+                    else if (m_boardArray[i, j].Shape.getShapeChar() == 'U')
+                    {
+                        oScore += 4;
+                        oExists = true;
+                    }
+
                 }
             }
             if (xExists && !oExists)

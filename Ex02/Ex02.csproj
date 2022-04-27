@@ -40,7 +40,6 @@
     <Compile Include="Logic\GameState.cs" />
     <Compile Include="Logic\Move.cs" />
     <Compile Include="Logic\Piece.cs" />
-    <Compile Include="Logic\Player.cs" />
     <Compile Include="Logic\Position.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

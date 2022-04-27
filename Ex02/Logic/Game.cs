@@ -8,10 +8,6 @@ namespace Ex02.Logic
     public class Game
     {
         private GameState m_currentState;
-        private int m_rounds;
-        private bool m_isFinished;
-        private string[] m_results;
-        Player m_playerOne, m_playerTwo;
         public GameState currentState
         {
             get { return m_currentState; }
@@ -20,10 +16,6 @@ namespace Ex02.Logic
         public Game(int boardSize, string playerOneName, string playerTwoName)
         {
             m_currentState = new GameState(boardSize);
-            m_rounds = 0;
-            m_isFinished = false;
-            m_playerOne = new Player(playerOneName);
-            m_playerTwo = new Player(playerTwoName);
         }
 
         public bool makeMove(string m_currentMove, ShapeWrapper playerTurn)
@@ -31,11 +23,11 @@ namespace Ex02.Logic
             Move currentMove;
             if (m_currentState.playerTurn.getShapeChar() == 'X')
             {
-                currentMove = new Move(m_currentMove, m_playerOne);
+                currentMove = new Move(m_currentMove);
             }
             else
             {
-                currentMove = new Move(m_currentMove, m_playerTwo);
+                currentMove = new Move(m_currentMove);
             }
             if (m_currentState.CheckMove(currentMove))
             {
@@ -43,6 +35,61 @@ namespace Ex02.Logic
                 return true;
             }
             return false;
+        }
+
+        public void makeComputerTurn(ref bool finished, ref bool keepPlaying, out string o_moveString)
+        {
+            string o_localMoveString = " ";
+            while (keepPlaying)
+            {
+                // is there eating before move
+                keepPlaying = currentState.IsEatingPossible();
+                makeComputerMove(out o_localMoveString);
+                // is there eating after move
+                if (keepPlaying)
+                {
+                    keepPlaying = currentState.IsEatingPossible();
+                }
+            }
+            o_moveString = o_localMoveString;
+            // Check if the game has ended
+            finished = currentState.CheckGameOver();
+        } 
+        
+        private void makeComputerMove(out string o_moveString)
+        {
+            Random rand = new Random();
+            int index;
+            m_currentState.SetAllComputerPossibleMoves();
+            if (m_currentState.PossibleComputerEatingMoves.Count != 0)
+            {
+                index = rand.Next(m_currentState.PossibleComputerEatingMoves.Count);
+                m_currentState.PlayMove(m_currentState.PossibleComputerEatingMoves[index]);
+                o_moveString = moveToString(m_currentState.PossibleComputerEatingMoves[index]);
+            }
+            else if (m_currentState.PossibleComputerMoves.Count != 0)
+            {
+                index = rand.Next(m_currentState.PossibleComputerMoves.Count);
+                m_currentState.PlayMove(m_currentState.PossibleComputerMoves[index]);
+                o_moveString = moveToString(m_currentState.PossibleComputerMoves[index]);
+            }
+            else
+            {
+                o_moveString = "No possible move";
+            }
+            System.Threading.Thread.Sleep(3000);
+                
+        }
+
+        private string moveToString(Move move)
+        {
+            StringBuilder moveString = new StringBuilder();
+            moveString.Append(Convert.ToChar(move.startPosition.Col + 'A'));
+            moveString.Append(Convert.ToChar(move.startPosition.Row + 'a'));
+            moveString.Append('>');
+            moveString.Append(Convert.ToChar(move.endPosition.Col + 'A'));
+            moveString.Append(Convert.ToChar(move.endPosition.Row + 'a'));
+            return moveString.ToString();
         }
     }
 }

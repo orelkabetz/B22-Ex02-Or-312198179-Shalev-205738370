@@ -175,6 +175,7 @@ Please try again: ");
         }
         public void displayTurn(ShapeWrapper playerTurn, ShapeWrapper previousTurn)
         {
+           PreviousMove = CurrentMove;
             // Print a message to the user which one's turn, and to make a move
             if ((playerTurn.getShapeChar() == 'X') && (previousTurn.getShapeChar() == 'O'))
             {
