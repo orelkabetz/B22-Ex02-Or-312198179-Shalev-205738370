@@ -27,7 +27,7 @@ namespace Ex02.Logic
             get { return m_playerTurn; }
             set { m_playerTurn = value; }
         }
-        public void switchTurn()
+        public void SwitchTurn()
         {
             if (m_playerTurn.getShapeChar() == 'X')
             {
@@ -38,7 +38,7 @@ namespace Ex02.Logic
                 m_playerTurn.Shape = ShapeWrapper.eShape.X;
             }
         }
-        public bool checkMove(Move currentMove)
+        public bool CheckMove(Move currentMove)
         {
             // Check if the start or end position is in the same row/col - not possible
             if ((currentMove.startPosition.Row == currentMove.endPosition.Row)
@@ -56,13 +56,17 @@ namespace Ex02.Logic
             }
             return true;
         }
-        public void playMove(Move currentMove)
+        public void PlayMove(Move currentMove)
         {
             int eatenRow;
             int eatenCol;
             char temp = m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape.getShapeChar();
             m_boardArray[currentMove.startPosition.Row, currentMove.startPosition.Col].Shape = new ShapeWrapper(' ');
             m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].Shape = new ShapeWrapper(temp);
+            if (temp == 'K')
+            {
+                m_boardArray[currentMove.endPosition.Row, currentMove.endPosition.Col].IsKing = true;
+            }
             if (Math.Abs(currentMove.startPosition.Row-currentMove.endPosition.Row) == 2)
             {
                 eatenRow = (currentMove.startPosition.Row + currentMove.endPosition.Row) / 2;
@@ -91,18 +95,15 @@ namespace Ex02.Logic
             }
 
         }
-        public bool checkGameOver()
+        public bool CheckGameOver()
         {
-            char winnerShape;
-            return checkWin(out winnerShape) || checkDraw();
+            return checkWin() || checkDraw();
         }
-
         private bool checkDraw()
         {
             return false;
         }
-
-        private bool checkWin(out char winnerShape)
+        private bool checkWin()
         {
             // if winner is X winnerShape = 'X' , else if winner is O winnerShape is '0' ,else (no winner) winnerShape = ' '
             bool xExists = false;
@@ -115,28 +116,21 @@ namespace Ex02.Logic
                     if (m_boardArray[i, j].Shape.getShapeChar() == 'X' || m_boardArray[i, j].Shape.getShapeChar() == 'K')
                     {
                         xExists = true;
-
                     }
                     if (m_boardArray[i, j].Shape.getShapeChar() == 'O' || m_boardArray[i, j].Shape.getShapeChar() == 'U')
                     {
                         oExists = true;
-
                     }
                 }
             }
             if (xExists && !oExists)
             {
-                winnerShape = 'X';
-                Console.WriteLine("X WIN");
                 return xExists;
             }
             else if (!xExists && oExists)
             {
-                winnerShape = 'O';
-                Console.WriteLine("O WIN");
                 return oExists;
             }
-            winnerShape = ' ';
             return false;
         }
         private bool isStartPositionValid(Move currentMove)
@@ -239,7 +233,7 @@ namespace Ex02.Logic
         {
             if (stepSize == 1)
             {
-                if (isEatingPossible())
+                if (IsEatingPossible())
                 {
                     int x = 0;
 
@@ -262,7 +256,7 @@ namespace Ex02.Logic
         {
             if (stepSize == 1)
             {
-                if (isEatingPossible())
+                if (IsEatingPossible())
                 {
                     int x = 0;
                     return checkIfPlayerMoveEating(currentMove);
@@ -327,7 +321,7 @@ namespace Ex02.Logic
             }
             return isEating;
         }
-        public bool isEatingPossible()
+        public bool IsEatingPossible()
         {
             if (m_playerTurn.getShapeChar() == 'X')
             {

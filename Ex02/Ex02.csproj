@@ -33,7 +33,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ConsoleUserInterface\Controller.cs" />
-    <Compile Include="ConsoleUserInterface\GameBoard.cs" />
     <Compile Include="ConsoleUserInterface\Messages.cs" />
     <Compile Include="ShapeWrapper.cs" />
     <Compile Include="Logic\DirectionWrapper.cs" />

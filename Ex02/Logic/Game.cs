@@ -37,9 +37,9 @@ namespace Ex02.Logic
             {
                 currentMove = new Move(m_currentMove, m_playerTwo);
             }
-            if (m_currentState.checkMove(currentMove))
+            if (m_currentState.CheckMove(currentMove))
             {
-                m_currentState.playMove(currentMove);
+                m_currentState.PlayMove(currentMove);
                 return true;
             }
             return false;

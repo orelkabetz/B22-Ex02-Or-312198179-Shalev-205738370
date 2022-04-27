@@ -59,6 +59,23 @@ namespace Ex02.ConsoleUserInterface
         # CHECKERS #");
             Console.WriteLine(hello);
         }
+        public void displayWinner(ShapeWrapper playerTurn)
+        {
+            string winnerName;
+            if (playerTurn.getShapeChar() == 'X')
+            {
+                winnerName = m_playerOneName;
+            }
+            else //'O'
+            {
+                winnerName = m_playerTwoName;
+            }
+            string winner = string.Format(
+@"
+    The Winner is:
+        {0}", winnerName);
+            Console.WriteLine(winner);
+        }
         private void defineSettings()
         {
             m_playerOneName = getNameFromUser();
